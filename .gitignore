@@ -1,0 +1,9 @@
+/.venv
+/CopySharedFileToGoogleColab.ipynb
+/Potsdam-GeoTif-split-0.tfrecords
+/Potsdam-GeoTif-split-1.tfrecords
+/Potsdam-GeoTif-split-2.tfrecords
+/Potsdam-GeoTif-split-3.tfrecords
+/Potsdam-GeoTif-split-4.tfrecords
+/Potsdam-GeoTif.zip
+/Visualize_GeoTiff.ipynb
