@@ -3,4 +3,5 @@
 *.tfrecords
 *.keras
 .DS_Store
+.env.secrets
 __pycache__

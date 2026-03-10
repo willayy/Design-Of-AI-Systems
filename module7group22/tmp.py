@@ -15,7 +15,9 @@ class Frame:
         self.name = type(self).__name__
         self.completed = False
         self.parent = parent
-        method_members = inspect.getmembers(self, predicate=inspect.ismethod)
+        method_members = inspect.getmembers(
+            self, predicate=inspect.ismethod
+        )
         var_members = vars(self).items()
         self.actions = {
             name.removeprefix("action_"): method
@@ -26,7 +28,9 @@ class Frame:
             name.removeprefix("field_"): field
             for name, field in var_members
             if name.startswith("field_")
-            and not name.startswith(("field_prompt_", "field_expected_answer_"))
+            and not name.startswith(
+                ("field_prompt_", "field_expected_answer_")
+            )
         }
         self.field_prompts: dict[str, str] = {
             name.removeprefix("field_prompt_"): field
@@ -39,7 +43,9 @@ class Frame:
             if name.startswith("field_expected_answer_")
         }
         self.action_tokens = {
-            action: {k: None for k in inspect.signature(fn).parameters.keys()}
+            action: {
+                k: None for k in inspect.signature(fn).parameters.keys()
+            }
             for action, fn in self.actions.items()
         }
 
@@ -109,7 +115,10 @@ class Date(Frame):
 class Duration(Frame):
     def __init__(self, time=None, parent=None):
         self.time = time
-        self.expected_answer = ["I WANT TO STAY FOR _ _", "I WANT TO SPEND _ _ OF TIME"]
+        self.expected_answer = [
+            "I WANT TO STAY FOR _ _",
+            "I WANT TO SPEND _ _ OF TIME",
+        ]
         self.field_time = time
         self.field_prompt_time = "HOW LONG DO YOU WANT TO STAY?"
         self.field_expected_answer_time_add = [
@@ -126,19 +135,37 @@ class Duration(Frame):
 
 class Location(Frame):
     def __init__(
-        self, country=None, city=None, street=None, parent=None, query_type="restaurants"
+        self,
+        country=None,
+        city=None,
+        street=None,
+        parent=None,
+        query_type="restaurants",
     ):
         self.db = db
         self.query_type = query_type
         self.field_country = country
         self.field_city = city
         self.field_street = street
-        self.field_prompt_country = "WHICH COUNTRY?\n" + self.country_suggest()
+        self.field_prompt_country = (
+            "WHICH COUNTRY?\n" + self.country_suggest()
+        )
         self.field_prompt_city = "WHICH CITY?\n" + self.city_suggest()
-        self.field_prompt_street = "WHICH STREET?\n" + self.street_suggest()
-        self.field_expected_answer_country_add = ["THE COUNTRY IS _", "COUNTRY NAME IS _"]
-        self.field_expected_answer_city_add = ["THE CITY IS _", "CITY NAME IS _"]
-        self.field_expected_answer_street_add = ["STREET NAME IS _", "THE STREET IS _"]
+        self.field_prompt_street = (
+            "WHICH STREET?\n" + self.street_suggest()
+        )
+        self.field_expected_answer_country_add = [
+            "THE COUNTRY IS _",
+            "COUNTRY NAME IS _",
+        ]
+        self.field_expected_answer_city_add = [
+            "THE CITY IS _",
+            "CITY NAME IS _",
+        ]
+        self.field_expected_answer_street_add = [
+            "STREET NAME IS _",
+            "THE STREET IS _",
+        ]
         super().__init__(parent=parent)
 
     def country_suggest(self) -> str:
@@ -150,7 +177,8 @@ class Location(Frame):
             )
             and (
                 self.field_street is None
-                or r["location"]["street"].lower() == self.field_street.lower()
+                or r["location"]["street"].lower()
+                == self.field_street.lower()
             ),
         )
         options = sorted({r["location"]["country"] for r in results})
@@ -161,11 +189,13 @@ class Location(Frame):
             self.query_type,
             lambda r: (
                 self.field_country is None
-                or r["location"]["country"].lower() == self.field_country.lower()
+                or r["location"]["country"].lower()
+                == self.field_country.lower()
             )
             and (
                 self.field_street is None
-                or r["location"]["street"].lower() == self.field_street.lower()
+                or r["location"]["street"].lower()
+                == self.field_street.lower()
             ),
         )
         options = sorted({r["location"]["city"] for r in results})
@@ -176,7 +206,8 @@ class Location(Frame):
             self.query_type,
             lambda r: (
                 self.field_country is None
-                or r["location"]["country"].lower() == self.field_country.lower()
+                or r["location"]["country"].lower()
+                == self.field_country.lower()
             )
             and (
                 self.field_city is None
@@ -189,20 +220,28 @@ class Location(Frame):
     def action_country_add(self, country):
         self.field_country = country
         self.field_prompt_city = "WHICH CITY?\n" + self.city_suggest()
-        self.field_prompt_street = "WHICH STREET?\n" + self.street_suggest()
+        self.field_prompt_street = (
+            "WHICH STREET?\n" + self.street_suggest()
+        )
         self.check_completed()
         return self
 
     def action_city_add(self, city):
         self.field_city = city
-        self.field_prompt_country = "WHICH COUNTRY?\n" + self.country_suggest()
-        self.field_prompt_street = "WHICH STREET?\n" + self.street_suggest()
+        self.field_prompt_country = (
+            "WHICH COUNTRY?\n" + self.country_suggest()
+        )
+        self.field_prompt_street = (
+            "WHICH STREET?\n" + self.street_suggest()
+        )
         self.check_completed()
         return self
 
     def action_street_add(self, street):
         self.field_street = street
-        self.field_prompt_country = "WHICH COUNTRY?\n" + self.country_suggest()
+        self.field_prompt_country = (
+            "WHICH COUNTRY?\n" + self.country_suggest()
+        )
         self.field_prompt_city = "WHICH CITY?\n" + self.city_suggest()
         self.check_completed()
         return self
@@ -217,7 +256,9 @@ class RestaurantVisit(Frame):
         self.field_date = date
         self.field_name = name
         self.field_prompt_location = "WHERE IS THE RESTAURANT LOCATED?"
-        self.field_prompt_date = "WHEN DO YOU WANT TO GO TO THE RESTAURANT?"
+        self.field_prompt_date = (
+            "WHEN DO YOU WANT TO GO TO THE RESTAURANT?"
+        )
         self.field_prompt_name = "WHAT IS THE NAME OF THE RESTAURANT?"
         self.field_expected_answer_location_add_country = [
             "ITS IN THE COUNTRY OF _",
@@ -236,7 +277,9 @@ class RestaurantVisit(Frame):
             "I WANT TO GO THERE IN _",
             "I WANT TO GO THERE THIS _",
         ]
-        self.field_expected_answer_date_add_day = ["I WANT TO GO THERE ON THE _"]
+        self.field_expected_answer_date_add_day = [
+            "I WANT TO GO THERE ON THE _"
+        ]
         self.field_expected_answer_date_add_nearby_weekday = [
             "THIS MONDAY",
             "THIS TUESDAY",
@@ -246,7 +289,10 @@ class RestaurantVisit(Frame):
             "THIS SATURDAY",
             "THIS SUNDAY",
         ]
-        self.field_expected_answer_name_add = ["IT IS CALLED _ ", "NAME IS _ "]
+        self.field_expected_answer_name_add = [
+            "IT IS CALLED _ ",
+            "NAME IS _ ",
+        ]
         super().__init__(parent=parent)
 
     def action_location_add_country(self, country, parent):
@@ -257,7 +303,9 @@ class RestaurantVisit(Frame):
         return self.field_location
 
     def action_location_add_city(self, city, parent):
-        self.field_location = Location(city=city, parent=parent, query_type="restaurants")
+        self.field_location = Location(
+            city=city, parent=parent, query_type="restaurants"
+        )
         self.check_completed()
         return self.field_location
 
@@ -307,16 +355,27 @@ class WeatherForecast(Frame):
         self.field_humidity = humidity
         self.field_weather_type = weather_type
 
-        self.field_prompt_location = "WHERE DO YOU WANT THE WEATHER FORECAST FOR?"
-        self.field_prompt_temperature = "WHAT TEMPERATURE ARE YOU INTERESTED IN?"
-        self.field_prompt_humidity = "WHAT HUMIDITY LEVEL ARE YOU INTERESTED IN?"
-        self.field_prompt_weather_type = "WHAT TYPE OF WEATHER ARE YOU LOOKING FOR?"
+        self.field_prompt_location = (
+            "WHERE DO YOU WANT THE WEATHER FORECAST FOR?"
+        )
+        self.field_prompt_temperature = (
+            "WHAT TEMPERATURE ARE YOU INTERESTED IN?"
+        )
+        self.field_prompt_humidity = (
+            "WHAT HUMIDITY LEVEL ARE YOU INTERESTED IN?"
+        )
+        self.field_prompt_weather_type = (
+            "WHAT TYPE OF WEATHER ARE YOU LOOKING FOR?"
+        )
 
         self.field_expected_answer_location_add_country = [
             "FOR THE COUNTRY OF _",
             "COUNTRY IS _",
         ]
-        self.field_expected_answer_location_add_city = ["FOR THE CITY OF _", "CITY IS _"]
+        self.field_expected_answer_location_add_city = [
+            "FOR THE CITY OF _",
+            "CITY IS _",
+        ]
         self.field_expected_answer_location_add_street = [
             "FOR THE STREET _",
             "STREET IS _",
@@ -329,7 +388,10 @@ class WeatherForecast(Frame):
             "HUMIDITY IS _",
             "IT IS _ PERCENT HUMID",
         ]
-        self.field_expected_answer_weather_type_add = ["WEATHER IS _", "IT IS _"]
+        self.field_expected_answer_weather_type_add = [
+            "WEATHER IS _",
+            "IT IS _",
+        ]
         super().__init__(parent=parent)
 
     def action_location_add_country(self, country, parent):
@@ -340,12 +402,16 @@ class WeatherForecast(Frame):
         return self.field_location
 
     def action_location_add_city(self, city, parent):
-        self.field_location = Location(city=city, parent=parent, query_type="weather")
+        self.field_location = Location(
+            city=city, parent=parent, query_type="weather"
+        )
         self.check_completed()
         return self.field_location
 
     def action_location_add_street(self, street, parent):
-        self.field_location = Location(street=street, parent=parent, query_type="weather")
+        self.field_location = Location(
+            street=street, parent=parent, query_type="weather"
+        )
         self.check_completed()
         return self.field_location
 
@@ -379,10 +445,14 @@ class PublicTransportTrip(Frame):
         self.field_arrival_location = arrival_location
 
         self.field_prompt_transport_type = "WHAT TYPE OF TRANSPORT?"
-        self.field_prompt_departure_location = "WHERE ARE YOU DEPARTING FROM?"
+        self.field_prompt_departure_location = (
+            "WHERE ARE YOU DEPARTING FROM?"
+        )
         self.field_prompt_arrival_location = "WHERE ARE YOU ARRIVING TO?"
 
-        self.field_expected_answer_transport_type_add = ["I WANT TO TRAVEL BY _"]
+        self.field_expected_answer_transport_type_add = [
+            "I WANT TO TRAVEL BY _"
+        ]
         self.field_expected_answer_departure_location_add = ["FROM _"]
         self.field_expected_answer_arrival_location_add = ["TO _"]
         super().__init__(parent=parent)
@@ -413,13 +483,21 @@ class Dialog(Frame):
         self.field_prompt_weather_forecast = None
         self.field_prompt_public_transport_trip = None
 
-        self.field_expected_answer_restaurant_visit_add = ["I WANT TO BOOK A RESTAURANT"]
-        self.field_expected_answer_weather_forecast_add = ["WHAT IS THE WEATHER?"]
-        self.field_expected_answer_public_transport_trip_add = ["I WANT TO TRAVEL BY BUS"]
+        self.field_expected_answer_restaurant_visit_add = [
+            "I WANT TO BOOK A RESTAURANT"
+        ]
+        self.field_expected_answer_weather_forecast_add = [
+            "WHAT IS THE WEATHER?"
+        ]
+        self.field_expected_answer_public_transport_trip_add = [
+            "I WANT TO TRAVEL BY BUS"
+        ]
         super().__init__(parent=None)
 
     def action_restaurant_visit_add(self, location, date, parent):
-        self.field_restaurant_visit = RestaurantVisit(location, date, parent)
+        self.field_restaurant_visit = RestaurantVisit(
+            location, date, parent
+        )
         self.check_completed()
         return self.field_restaurant_visit
 
